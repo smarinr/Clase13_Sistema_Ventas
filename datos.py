@@ -17,27 +17,43 @@ def guardar_csv(ventas, archivo="ventas.csv"):
             writer.writerows(ventas)
 
             print(f"Archivo {archivo} creado y datos guardados.")
+    except Exception as e:
+        print(f"Ocurrió un error al guardar el archivo: {e}")
 
-        with open(archivo, mode="a", newline="", encoding="utf-8") as file:
-            writer = csv.writer(file)
-            for venta in ventas:
-                writer.writerow(venta.values())  # Escribir datos
+
+def cargar_csv(archivo="ventas.csv"):
+    # Carga los datos desde un archivo CSV y los devuelve como una lista de diccionarios.
+    ventas = []
+    try:
+        with open(archivo, mode="r", newline="", encoding="utf-8") as base:
+            reader = csv.DictReader(base)
+            for row in reader:
+                ventas.append(row)
+        print(f"Datos cargados desde {archivo}.")
     except FileNotFoundError:
-        print(f"El archivo {archivo} no se encontró.")
+        print(f"El archivo {archivo} no existe. Se devolverá una lista vacía.")
+    except Exception as e:
+        print(f"Ocurrió un error al cargar el archivo: {e}")
+    return ventas
 
 
 def ingresar_ventas(ventas):
     # Función para ingresar datos de ventas desde la consola
+    fecha = ""
+    cliente = ""
+
     while True:
         try:
             producto = input("Ingrese el nombre del producto: ")
             cantidad = int(input("Ingrese la cantidad vendida: "))
             precio = float(input("Ingrese el precio del producto: "))
-            cliente = input("Ingrese el nombre del cliente: ")
-            # fecha se geenera automaticamente con la fecha actual
-            fecha = input("Ingrese la fecha de la venta (YYYY-MM-DD): ")
-            # fecha se geenera automaticamente con la funcion date.today()
-            # fecha = date.today().isoformat()
+
+            if fecha == "" and cliente == "":
+                cliente = input("Ingrese el nombre del cliente: ")
+                # fecha se geenera automaticamente con la fecha actual
+                fecha = input("Ingrese la fecha de la venta (YYYY-MM-DD): ")
+                # fecha se geenera automaticamente con la funcion date.today()
+                # fecha = date.today().isoformat()
 
             if cantidad < 0 or precio < 0:
                 print(
