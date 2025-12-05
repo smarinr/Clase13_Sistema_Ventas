@@ -1,66 +1,49 @@
 import csv
+import pandas as pd
 
 
 def guardar_csv(ventas, archivo="ventas.csv"):
-    # Guarda kis datos en "ventas" o en el archivo especificado en formato CSV.
-
-    if not ventas:  # Lista vacia, se detiene la funcion
+    """Guarda la lista de ventas en un archivo CSV."""
+    if not ventas:  # Lista vacía se detiene la función
         print("No hay datos para guardar.")
         return
+
     try:
         with open(archivo, mode="w", newline="", encoding="utf-8") as base:
-
             columnas = ["Producto", "Cantidad", "Precio", "Cliente", "Fecha"]
             writer = csv.DictWriter(base, fieldnames=columnas)
 
             writer.writeheader()
             writer.writerows(ventas)
 
-            print(f"Archivo {archivo} creado y datos guardados.")
+            print(f"Datos guardados correctamente en {archivo}.")
     except Exception as e:
-        print(f"Ocurrió un error al guardar el archivo: {e}")
-
-
-def cargar_csv(archivo="ventas.csv"):
-    # Carga los datos desde un archivo CSV y los devuelve como una lista de diccionarios.
-    ventas = []
-    try:
-        with open(archivo, mode="r", newline="", encoding="utf-8") as base:
-            reader = csv.DictReader(base)
-            for row in reader:
-                ventas.append(row)
-        print(f"Datos cargados desde {archivo}.")
-    except FileNotFoundError:
-        print(f"El archivo {archivo} no existe. Se devolverá una lista vacía.")
-    except Exception as e:
-        print(f"Ocurrió un error al cargar el archivo: {e}")
-    return ventas
+        print(f"Error al guardar los datos en {archivo}: {e}")
 
 
 def ingresar_ventas(ventas):
-    # Función para ingresar datos de ventas desde la consola
+    """ "Permite al usuario ingres una o varias ventas"""
     fecha = ""
     cliente = ""
-
     while True:
         try:
-            producto = input("Ingrese el nombre del producto: ")
+            producto = input("Ingrese el nombre del producto: ").upper()
             cantidad = int(input("Ingrese la cantidad vendida: "))
             precio = float(input("Ingrese el precio del producto: "))
-
-            if fecha == "" and cliente == "":
-                cliente = input("Ingrese el nombre del cliente: ")
-                # fecha se geenera automaticamente con la fecha actual
+            # Solicitar fecha y cliente solo si no se han proporcionado
+            if cliente == "" and fecha == "":
                 fecha = input("Ingrese la fecha de la venta (YYYY-MM-DD): ")
-                # fecha se geenera automaticamente con la funcion date.today()
-                # fecha = date.today().isoformat()
+                cliente = input("Ingrese el nombre del cliente: ").upper()
 
-            if cantidad < 0 or precio < 0:
-                print(
-                    "❌ ERROR: Cantidad y Precio deben ser números positivos. Por favor, intente de nuevo."
-                )
+            # Validar datos
+            if cantidad <= 0:
+                print("⚠️ La cantidad deber ser mayor a cero.")
+                continue
+            if precio < 0:
+                print("⚠️ El precio debe ser mayor a cero.")
                 continue
 
+            # Agregar a  la lista de ventas
             venta = {
                 "Producto": producto,
                 "Cantidad": cantidad,
@@ -68,48 +51,59 @@ def ingresar_ventas(ventas):
                 "Cliente": cliente,
                 "Fecha": fecha,
             }
-
+            # Añadir la venta a la lista principal
             ventas.append(venta)
-
+            # Preguntrar si desea ingresar otra venta
             continuar = input("¿Desea ingresar otra venta? (s/n): ").lower()
             if continuar != "s":
-                guardar_csv(ventas)
+                guardar_csv(ventas)  # Guardar después de cada ingreso
                 break
-
         except ValueError:
             print(
-                "❌ ERROR: Cantidad y Precio deben ser números enteros o decimales. Por favor, intente de nuevo."
+                "❌ Error Cantidad y precio deben ser numericos. Por favor, intente de nuevo."
             )
             continue
         except Exception as e:
-            print(f"❌ Ocurrió un error: {e}. Por favor, intente de nuevo.")
+            print(f"❌ Error al ingresar los datos: {e}")
             continue
 
-    return {
-        "Producto": producto,
-        "Cantidad": cantidad,
-        "Precio": precio,
-        "Cliente": cliente,
-        "Fecha": fecha,
-    }
+
+def cargar_ventas(archivo_csv="ventas.csv"):
+    """Carga las ventas desde un archivo CSV y las devuelve como una lista de diccionarios."""
+    try:
+        # Leer el archivo CSV usando pandas
+        df = pd.read_csv(archivo_csv)
+
+        # Convertir el DataFrame a una lista de diccionarios
+        # Se retorna una lista de diccionarios global VENTAS_DATA
+        ventas_cargadas = df.to_dict(orient="records")
+        print(f"✅ Datos cargados correctamente desde {archivo_csv}.")
+        return ventas_cargadas
+
+    except FileNotFoundError:
+        print(f"⚠️ El archivo {archivo_csv} no existe. No existen ventas registradas.")
+        return []
+    except Exception as e:
+        print(f"❌ Error al cargar los datos desde {archivo_csv}: {e}")
+        return []
 
 
 if __name__ == "__main__":
-    # Ejemplo de uso
+    # Prueba de la función guardar_csv
     ventas_ejemplo = [
         {
             "Producto": "Laptop",
             "Cantidad": 2,
             "Precio": 1200,
             "Cliente": "Juan Perez",
-            "Fecha": "2024-01-15",
+            "Fecha": "2024-06-01",
         },
         {
             "Producto": "Mouse",
             "Cantidad": 5,
             "Precio": 25,
             "Cliente": "Ana Gomez",
-            "Fecha": "2024-01-16",
+            "Fecha": "2024-06-02",
         },
     ]
     ingresar_ventas(ventas_ejemplo)
